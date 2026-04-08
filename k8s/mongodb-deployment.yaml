@@ -40,6 +40,8 @@ spec:
           volumeMounts:
             - name: mongodb-data
               mountPath: /data/db
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
   volumeClaimTemplates:
     - metadata:
         name: mongodb-data
