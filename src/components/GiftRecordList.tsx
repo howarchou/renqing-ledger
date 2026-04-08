@@ -14,8 +14,8 @@ import {
 
 interface Props {
   records: GiftRecord[];
-  onDelete: (id: string) => void;
-  onEdit: (record: GiftRecord) => void;
+  onDelete?: (id: string) => void;
+  onEdit?: (record: GiftRecord) => void;
 }
 
 export default function GiftRecordList({ records, onDelete, onEdit }: Props) {

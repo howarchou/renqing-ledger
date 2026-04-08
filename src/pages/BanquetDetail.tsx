@@ -7,9 +7,10 @@ import GiftRecordList from '@/components/GiftRecordList';
 import Statistics from '@/components/Statistics';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Download, Scroll } from 'lucide-react';
+import { ArrowLeft, Download, Scroll, Archive } from 'lucide-react';
 import { exportToCSV } from '@/lib/export';
 import { GiftRecord } from '@/types';
+import { Badge } from '@/components/ui/badge';
 
 export default function BanquetDetail() {
   const { id } = useParams<{ id: string }>();
