@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reqin-app
+  name: renqin-app
   labels:
-    app: reqin-app
+    app: renqin-app
 spec:
   replicas: 1
   strategy:
     type: Recreate  # 先删旧 Pod，再建新 Pod，避免端口冲突
   selector:
     matchLabels:
-      app: reqin-app
+      app: renqin-app
   template:
     metadata:
       labels:
-        app: reqin-app
+        app: renqin-app
     spec:
       imagePullSecrets:
         - name: acr-pull-secret
       containers:
-        - name: reqin-app
+        - name: renqin-app
           image: REGISTRY_URL/IMAGE_NAME:TAG
           ports:
             - containerPort: 8080

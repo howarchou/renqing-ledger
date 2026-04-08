@@ -75,7 +75,7 @@ export default function BanquetDetail() {
               </div>
             </div>
           </div>
-          <Button variant="outline" className="h-10 gap-2 rounded-xl" onClick={() => exportToCSV(records, banquet.name)}>
+          <Button variant="outline" className="h-10 gap-2 rounded-xl" onClick={() => exportToCSV(records, banquet.name, banquet.date)}>
             <Download className="w-4 h-4" /> 导出
           </Button>
         </div>
