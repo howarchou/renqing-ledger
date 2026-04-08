@@ -4,6 +4,7 @@ export interface Banquet {
   date: string;
   location: string;
   type: BanquetType;
+  frozen?: boolean;
   createdAt: string;
 }
 

@@ -27,6 +27,10 @@ export function useBanquets() {
     return newB;
   }, []);
 
+  const freezeBanquet = useCallback((id: string) => {
+    setBanquets(prev => prev.map(b => b.id === id ? { ...b, frozen: true } : b));
+  }, []);
+
   const deleteBanquet = useCallback((id: string) => {
     setBanquets(prev => prev.filter(b => b.id !== id));
     setRecords(prev => prev.filter(r => r.banquetId !== id));
