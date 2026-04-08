@@ -1,5 +1,7 @@
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBanquets } from '@/hooks/useBanquets';
+import { usePresets } from '@/hooks/usePresets';
 import GiftRecordForm from '@/components/GiftRecordForm';
 import GiftRecordList from '@/components/GiftRecordList';
 import Statistics from '@/components/Statistics';
@@ -7,14 +9,28 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Download, Scroll } from 'lucide-react';
 import { exportToCSV } from '@/lib/export';
+import { GiftRecord } from '@/types';
 
 export default function BanquetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getBanquet, getRecords, addRecord, deleteRecord } = useBanquets();
+  const { getBanquet, getRecords, addRecord, deleteRecord, updateRecord } = useBanquets();
+  const presets = usePresets();
+  const [editingRecord, setEditingRecord] = useState<GiftRecord | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const banquet = getBanquet(id || '');
   const records = getRecords(id || '');
+
+  const handleEdit = (record: GiftRecord) => {
+    setEditingRecord(record);
+    formRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleUpdate = (record: GiftRecord) => {
+    updateRecord(record);
+    setEditingRecord(null);
+  };
 
   if (!banquet) {
     return (
@@ -50,7 +66,21 @@ export default function BanquetDetail() {
       </header>
 
       <main className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
-        <GiftRecordForm banquetId={banquet.id} onAdd={addRecord} />
+        <div ref={formRef}>
+          <GiftRecordForm
+            banquetId={banquet.id}
+            onAdd={addRecord}
+            giftPresets={presets.giftPresets}
+            amountPresets={presets.amountPresets}
+            onAddGiftPreset={presets.addGiftPreset}
+            onRemoveGiftPreset={presets.removeGiftPreset}
+            onAddAmountPreset={presets.addAmountPreset}
+            onRemoveAmountPreset={presets.removeAmountPreset}
+            editingRecord={editingRecord}
+            onUpdate={handleUpdate}
+            onCancelEdit={() => setEditingRecord(null)}
+          />
+        </div>
 
         <Tabs defaultValue="records">
           <TabsList className="w-full grid grid-cols-2 h-12">
@@ -58,7 +88,7 @@ export default function BanquetDetail() {
             <TabsTrigger value="stats" className="text-base">📊 统计分析</TabsTrigger>
           </TabsList>
           <TabsContent value="records" className="mt-4">
-            <GiftRecordList records={records} onDelete={deleteRecord} />
+            <GiftRecordList records={records} onDelete={deleteRecord} onEdit={handleEdit} />
           </TabsContent>
           <TabsContent value="stats" className="mt-4">
             <Statistics records={records} />
