@@ -42,6 +42,9 @@ export function useBanquets() {
     setRecords(prev => prev.filter(r => r.id !== id));
   }, []);
 
+  const updateRecord = useCallback((updated: GiftRecord) => {
+    setRecords(prev => prev.map(r => r.id === updated.id ? updated : r));
+  }, []);
   const getRecords = useCallback((banquetId: string) => {
     return records.filter(r => r.banquetId === banquetId);
   }, [records]);
@@ -50,5 +53,5 @@ export function useBanquets() {
     return banquets.find(b => b.id === id);
   }, [banquets]);
 
-  return { banquets, records, addBanquet, deleteBanquet, addRecord, deleteRecord, getRecords, getBanquet };
+  return { banquets, records, addBanquet, deleteBanquet, addRecord, deleteRecord, updateRecord, getRecords, getBanquet };
 }

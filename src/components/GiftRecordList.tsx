@@ -5,14 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowUpDown, Search, LayoutGrid, List, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Search, LayoutGrid, List, Trash2, Pencil } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface Props {
   records: GiftRecord[];
   onDelete: (id: string) => void;
+  onEdit: (record: GiftRecord) => void;
 }
 
-export default function GiftRecordList({ records, onDelete }: Props) {
+export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
@@ -24,6 +30,26 @@ export default function GiftRecordList({ records, onDelete }: Props) {
     }
     return list.sort((a, b) => sortOrder === 'desc' ? b.amount - a.amount : a.amount - b.amount);
   }, [records, search, sortOrder]);
+
+  const DeleteButton = ({ id, size = 'icon' }: { id: string; size?: 'icon' | 'sm' }) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size={size} className={size === 'icon' ? 'h-8 w-8 text-muted-foreground hover:text-destructive' : 'h-7 w-7 text-muted-foreground hover:text-destructive'}>
+          <Trash2 className={size === 'icon' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>确认删除</AlertDialogTitle>
+          <AlertDialogDescription>确定要删除这条记录吗？此操作不可撤销。</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogAction onClick={() => onDelete(id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">删除</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   return (
     <div className="space-y-4">
@@ -54,7 +80,7 @@ export default function GiftRecordList({ records, onDelete }: Props) {
                 <TableHead className="text-base">礼金</TableHead>
                 <TableHead className="text-base">礼品</TableHead>
                 <TableHead className="text-base">备注</TableHead>
-                <TableHead className="w-10"></TableHead>
+                <TableHead className="w-20">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,9 +95,12 @@ export default function GiftRecordList({ records, onDelete }: Props) {
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => onDelete(r.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onEdit(r)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <DeleteButton id={r.id} />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -85,10 +114,12 @@ export default function GiftRecordList({ records, onDelete }: Props) {
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-semibold text-lg">{r.guestName}</span>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
-                    onClick={() => onDelete(r.id)}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => onEdit(r)}>
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <DeleteButton id={r.id} size="sm" />
+                  </div>
                 </div>
                 <p className="text-gold font-bold text-xl mb-2">¥{r.amount.toLocaleString()}</p>
                 {r.gifts.length > 0 && (
