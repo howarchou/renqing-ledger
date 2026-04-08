@@ -21,8 +21,10 @@ export default function BanquetDetail() {
 
   const banquet = getBanquet(id || '');
   const records = getRecords(id || '');
+  const isFrozen = banquet?.frozen === true;
 
   const handleEdit = (record: GiftRecord) => {
+    if (isFrozen) return;
     setEditingRecord(record);
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -57,6 +59,11 @@ export default function BanquetDetail() {
                 <h1 className="text-lg font-bold text-foreground">{banquet.name}</h1>
                 <p className="text-xs text-muted-foreground">{banquet.date} · {banquet.location || banquet.type}</p>
               </div>
+              {isFrozen && (
+                <Badge variant="secondary" className="gap-1 text-xs ml-2">
+                  <Archive className="w-3 h-3" /> 已归档
+                </Badge>
+              )}
             </div>
           </div>
           <Button variant="outline" className="h-10 gap-2" onClick={() => exportToCSV(records, banquet.name)}>
@@ -66,21 +73,29 @@ export default function BanquetDetail() {
       </header>
 
       <main className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
-        <div ref={formRef}>
-          <GiftRecordForm
-            banquetId={banquet.id}
-            onAdd={addRecord}
-            giftPresets={presets.giftPresets}
-            amountPresets={presets.amountPresets}
-            onAddGiftPreset={presets.addGiftPreset}
-            onRemoveGiftPreset={presets.removeGiftPreset}
-            onAddAmountPreset={presets.addAmountPreset}
-            onRemoveAmountPreset={presets.removeAmountPreset}
-            editingRecord={editingRecord}
-            onUpdate={handleUpdate}
-            onCancelEdit={() => setEditingRecord(null)}
-          />
-        </div>
+        {!isFrozen && (
+          <div ref={formRef}>
+            <GiftRecordForm
+              banquetId={banquet.id}
+              onAdd={addRecord}
+              giftPresets={presets.giftPresets}
+              amountPresets={presets.amountPresets}
+              onAddGiftPreset={presets.addGiftPreset}
+              onRemoveGiftPreset={presets.removeGiftPreset}
+              onAddAmountPreset={presets.addAmountPreset}
+              onRemoveAmountPreset={presets.removeAmountPreset}
+              editingRecord={editingRecord}
+              onUpdate={handleUpdate}
+              onCancelEdit={() => setEditingRecord(null)}
+            />
+          </div>
+        )}
+
+        {isFrozen && (
+          <div className="text-center py-4 text-muted-foreground text-sm border border-border/60 rounded-lg bg-muted/30">
+            📦 该宴会已归档，记录仅供查看，无法修改或删除
+          </div>
+        )}
 
         <Tabs defaultValue="records">
           <TabsList className="w-full grid grid-cols-2 h-12">
@@ -88,7 +103,11 @@ export default function BanquetDetail() {
             <TabsTrigger value="stats" className="text-base">📊 统计分析</TabsTrigger>
           </TabsList>
           <TabsContent value="records" className="mt-4">
-            <GiftRecordList records={records} onDelete={deleteRecord} onEdit={handleEdit} />
+            <GiftRecordList
+              records={records}
+              onDelete={isFrozen ? undefined : deleteRecord}
+              onEdit={isFrozen ? undefined : handleEdit}
+            />
           </TabsContent>
           <TabsContent value="stats" className="mt-4">
             <Statistics records={records} />
