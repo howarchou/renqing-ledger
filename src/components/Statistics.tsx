@@ -17,38 +17,46 @@ export default function Statistics({ records }: Props) {
 
   const topGuests = [...records].sort((a, b) => b.amount - a.amount).slice(0, 5);
 
+  const stats = [
+    { label: '总礼金', value: `¥${totalAmount.toLocaleString()}`, icon: Banknote, gradient: 'gradient-gold shadow-gold', textColor: 'text-gold-dark' },
+    { label: '来宾数', value: guestCount, icon: Users, gradient: 'gradient-festive shadow-festive', textColor: 'text-primary' },
+    { label: '平均礼金', value: `¥${avgAmount.toLocaleString()}`, icon: TrendingUp, gradient: 'bg-success', textColor: 'text-success' },
+    { label: '礼品种类', value: Object.keys(giftCounts).length, icon: Gift, gradient: 'bg-secondary', textColor: 'text-secondary' },
+  ];
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: '总礼金', value: `¥${totalAmount.toLocaleString()}`, icon: Banknote, color: 'text-gold' },
-          { label: '来宾数', value: guestCount, icon: Users, color: 'text-primary' },
-          { label: '平均礼金', value: `¥${avgAmount.toLocaleString()}`, icon: TrendingUp, color: 'text-success' },
-          { label: '礼品种类', value: Object.keys(giftCounts).length, icon: Gift, color: 'text-secondary' },
-        ].map(s => (
-          <Card key={s.label}>
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <s.icon className={`w-6 h-6 ${s.color} mb-2`} />
-              <p className="text-sm text-muted-foreground">{s.label}</p>
-              <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <Card key={s.label} className="border-0 shadow-card overflow-hidden animate-slide-up" style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}>
+            <CardContent className="p-5 flex flex-col items-center text-center">
+              <div className={`w-10 h-10 rounded-xl ${s.gradient} flex items-center justify-center mb-3`}>
+                <s.icon className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
+              <p className={`text-2xl font-bold ${s.textColor}`}>{s.value}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {topGuests.length > 0 && (
-          <Card>
-            <CardContent className="p-4">
-              <h4 className="font-semibold mb-3">🏆 礼金排行</h4>
-              <div className="space-y-2">
+          <Card className="border-0 shadow-card">
+            <CardContent className="p-5">
+              <h4 className="font-bold mb-4 flex items-center gap-2">
+                <span className="text-lg">🏆</span> 礼金排行
+              </h4>
+              <div className="space-y-1">
                 {topGuests.map((r, i) => (
-                  <div key={r.id} className="flex justify-between items-center py-1">
-                    <span className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground w-5">{i + 1}.</span>
+                  <div key={r.id} className="flex justify-between items-center py-2.5 px-3 rounded-xl hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-3">
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'gradient-gold text-primary-foreground' : i === 1 ? 'bg-muted-foreground/20 text-muted-foreground' : i === 2 ? 'bg-secondary/20 text-secondary' : 'bg-muted text-muted-foreground'}`}>
+                        {i + 1}
+                      </span>
                       <span className="font-medium">{r.guestName}</span>
                     </span>
-                    <span className="text-gold font-semibold">¥{r.amount.toLocaleString()}</span>
+                    <span className="text-gold-dark font-bold">¥{r.amount.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
@@ -56,14 +64,21 @@ export default function Statistics({ records }: Props) {
           </Card>
         )}
         {topGifts.length > 0 && (
-          <Card>
-            <CardContent className="p-4">
-              <h4 className="font-semibold mb-3">🎁 礼品统计</h4>
-              <div className="space-y-2">
+          <Card className="border-0 shadow-card">
+            <CardContent className="p-5">
+              <h4 className="font-bold mb-4 flex items-center gap-2">
+                <span className="text-lg">🎁</span> 礼品统计
+              </h4>
+              <div className="space-y-1">
                 {topGifts.map(([name, count]) => (
-                  <div key={name} className="flex justify-between items-center py-1">
+                  <div key={name} className="flex justify-between items-center py-2.5 px-3 rounded-xl hover:bg-muted/50 transition-colors">
                     <span className="font-medium">{name}</span>
-                    <span className="text-muted-foreground">{count} 份</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full rounded-full gradient-festive" style={{ width: `${(count / records.length) * 100}%` }} />
+                      </div>
+                      <span className="text-sm text-muted-foreground w-12 text-right">{count} 份</span>
+                    </div>
                   </div>
                 ))}
               </div>

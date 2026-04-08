@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,35 +6,35 @@
 
 @layer base {
   :root {
-    --background: 30 50% 97%;
-    --foreground: 0 20% 15%;
+    --background: 35 45% 96%;
+    --foreground: 0 25% 12%;
 
-    --card: 30 40% 99%;
-    --card-foreground: 0 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 20% 15%;
+    --popover-foreground: 0 25% 12%;
 
-    --primary: 0 72% 51%;
+    --primary: 355 78% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 35 80% 52%;
+    --secondary: 38 90% 52%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 30 30% 93%;
-    --muted-foreground: 0 10% 45%;
+    --muted: 30 25% 92%;
+    --muted-foreground: 0 10% 42%;
 
-    --accent: 35 80% 52%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 355 60% 94%;
+    --accent-foreground: 355 78% 42%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 30 25% 88%;
-    --input: 30 25% 88%;
-    --ring: 0 72% 51%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 355 78% 48%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -45,36 +45,47 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Custom tokens */
-    --gold: 40 85% 55%;
-    --gold-light: 42 90% 70%;
-    --festive: 0 72% 51%;
-    --festive-light: 0 60% 95%;
-    --warm-bg: 30 50% 97%;
-    --success: 142 71% 45%;
+    /* Custom festive tokens */
+    --gold: 42 92% 56%;
+    --gold-light: 44 95% 72%;
+    --gold-dark: 38 85% 42%;
+    --festive: 355 78% 48%;
+    --festive-light: 355 80% 96%;
+    --festive-glow: 355 75% 58%;
+    --warm-bg: 35 45% 96%;
+    --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
+
+    /* Gradients & shadows */
+    --gradient-festive: linear-gradient(135deg, hsl(355, 78%, 48%), hsl(355, 75%, 58%));
+    --gradient-gold: linear-gradient(135deg, hsl(38, 85%, 42%), hsl(42, 92%, 56%));
+    --gradient-warm: linear-gradient(180deg, hsl(35, 45%, 96%), hsl(30, 30%, 93%));
+    --shadow-festive: 0 4px 20px -4px hsl(355 78% 48% / 0.25);
+    --shadow-gold: 0 4px 20px -4px hsl(42 92% 56% / 0.3);
+    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.06), 0 0 0 1px hsl(0 0% 0% / 0.03);
+    --shadow-card-hover: 0 8px 30px -6px hsl(0 0% 0% / 0.12), 0 0 0 1px hsl(0 0% 0% / 0.04);
   }
 
   .dark {
-    --background: 0 15% 8%;
-    --foreground: 30 30% 92%;
+    --background: 0 18% 7%;
+    --foreground: 30 20% 90%;
     --card: 0 15% 11%;
-    --card-foreground: 30 30% 92%;
+    --card-foreground: 30 20% 90%;
     --popover: 0 15% 11%;
-    --popover-foreground: 30 30% 92%;
-    --primary: 0 72% 55%;
+    --popover-foreground: 30 20% 90%;
+    --primary: 355 72% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 35 80% 52%;
+    --secondary: 38 85% 52%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 0 10% 18%;
-    --muted-foreground: 30 15% 60%;
-    --accent: 35 80% 52%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 0 10% 20%;
-    --input: 0 10% 20%;
-    --ring: 0 72% 55%;
+    --muted: 0 10% 16%;
+    --muted-foreground: 30 12% 55%;
+    --accent: 355 40% 18%;
+    --accent-foreground: 355 72% 70%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 10% 18%;
+    --input: 0 10% 18%;
+    --ring: 355 72% 55%;
   }
 }
 
@@ -84,7 +95,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Noto Sans SC', system-ui, sans-serif;
   }
 }
@@ -104,5 +115,39 @@
   }
   .bg-success {
     background-color: hsl(var(--success));
+  }
+
+  /* Modern festive utilities */
+  .gradient-festive {
+    background: var(--gradient-festive);
+  }
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  .shadow-festive {
+    box-shadow: var(--shadow-festive);
+  }
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Glassmorphism */
+  .glass {
+    backdrop-filter: blur(16px) saturate(180%);
+    background-color: hsl(0 0% 100% / 0.75);
+  }
+
+  /* Festive decorative pattern */
+  .festive-pattern {
+    background-image: 
+      radial-gradient(circle at 20% 50%, hsl(355, 78%, 48%, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(42, 92%, 56%, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 60% 80%, hsl(355, 78%, 48%, 0.02) 0%, transparent 50%);
   }
 }
