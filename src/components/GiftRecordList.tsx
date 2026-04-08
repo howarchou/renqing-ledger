@@ -31,25 +31,37 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
     return list.sort((a, b) => sortOrder === 'desc' ? b.amount - a.amount : a.amount - b.amount);
   }, [records, search, sortOrder]);
 
-  const DeleteButton = ({ id, size = 'icon' }: { id: string; size?: 'icon' | 'sm' }) => (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size={size} className={size === 'icon' ? 'h-8 w-8 text-muted-foreground hover:text-destructive' : 'h-7 w-7 text-muted-foreground hover:text-destructive'}>
-          <Trash2 className={size === 'icon' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>确认删除</AlertDialogTitle>
-          <AlertDialogDescription>确定要删除这条记录吗？此操作不可撤销。</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onDelete(id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">删除</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+  const DeleteButton = ({ id, size = 'icon' }: { id: string; size?: 'icon' | 'sm' }) => {
+    if (!onDelete) return null;
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size={size} className={size === 'icon' ? 'h-8 w-8 text-muted-foreground hover:text-destructive' : 'h-7 w-7 text-muted-foreground hover:text-destructive'}>
+            <Trash2 className={size === 'icon' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>确定要删除这条记录吗？此操作不可撤销。</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onDelete(id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
+
+  const EditButton = ({ record, size = 'icon' }: { record: GiftRecord; size?: 'icon' | 'sm' }) => {
+    if (!onEdit) return null;
+    return (
+      <Button variant="ghost" size={size} className={size === 'icon' ? 'h-8 w-8 text-muted-foreground hover:text-primary' : 'h-7 w-7 text-muted-foreground hover:text-primary'} onClick={() => onEdit(record)}>
+        <Pencil className={size === 'icon' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+      </Button>
+    );
+  };
 
   return (
     <div className="space-y-4">
