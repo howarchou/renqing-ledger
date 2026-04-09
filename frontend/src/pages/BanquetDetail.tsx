@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useBanquets } from '@/hooks/useBanquets';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useBanquets, DataSource } from '@/hooks/useBanquets';
 import { usePresets } from '@/hooks/usePresets';
 import GiftRecordForm from '@/components/GiftRecordForm';
 import GiftRecordList from '@/components/GiftRecordList';
@@ -10,10 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Download, Scroll, Archive } from 'lucide-react';
 import { exportToCSV } from '@/lib/export';
-import { GiftRecord } from '@/types';
+import type { GiftRecord } from '@/lib/api';
 
 export default function BanquetDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const source = searchParams.get('source') as DataSource || 'local';
   const navigate = useNavigate();
   const { getBanquet, getRecords, addRecord, deleteRecord, updateRecord } = useBanquets();
   const presets = usePresets();
@@ -21,7 +23,8 @@ export default function BanquetDetail() {
   const formRef = useRef<HTMLDivElement>(null);
 
   const banquet = getBanquet(id || '');
-  const records = getRecords(id || '');
+  const recordsWithSource = getRecords(id || '');
+  const records = recordsWithSource.map(r => r.record);
   const isFrozen = banquet?.frozen === true;
 
   const handleEdit = (record: GiftRecord) => {
@@ -31,8 +34,18 @@ export default function BanquetDetail() {
   };
 
   const handleUpdate = (record: GiftRecord) => {
-    updateRecord(record);
+    updateRecord(record.id, {
+      guest_name: record.guest_name,
+      amount: record.amount,
+      gifts: record.gifts,
+      note: record.note,
+    });
     setEditingRecord(null);
+  };
+
+  const handleAdd = (data: { guest_name: string; amount: number; gifts: string[]; note: string }) => {
+    if (!id) return;
+    addRecord(id, data);
   };
 
   if (!banquet) {
@@ -87,7 +100,7 @@ export default function BanquetDetail() {
           <div ref={formRef} className="animate-fade-in">
             <GiftRecordForm
               banquetId={banquet.id}
-              onAdd={addRecord}
+              onAdd={handleAdd}
               giftPresets={presets.giftPresets}
               amountPresets={presets.amountPresets}
               onAddGiftPreset={presets.addGiftPreset}
@@ -116,7 +129,7 @@ export default function BanquetDetail() {
           <TabsContent value="records" className="mt-4 animate-fade-in">
             <GiftRecordList
               records={records}
-              onDelete={isFrozen ? undefined : deleteRecord}
+              onDelete={isFrozen ? undefined : (id) => deleteRecord(id)}
               onEdit={isFrozen ? undefined : handleEdit}
             />
           </TabsContent>

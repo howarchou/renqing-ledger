@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { GiftRecord, SortOrder, ViewMode } from '@/types';
+import type { GiftRecord } from '@/lib/api';
+import { SortOrder, ViewMode } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +28,7 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
   const filtered = useMemo(() => {
     let list = records;
     if (search.trim()) {
-      list = list.filter(r => r.guestName.includes(search.trim()));
+      list = list.filter(r => r.guest_name.includes(search.trim()));
     }
     return list.sort((a, b) => sortOrder === 'desc' ? b.amount - a.amount : a.amount - b.amount);
   }, [records, search, sortOrder]);
@@ -101,7 +102,7 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
               {filtered.map((r, i) => (
                 <TableRow key={r.id} className="animate-fade-in">
                   <TableCell className="text-muted-foreground text-sm">{i + 1}</TableCell>
-                  <TableCell className="font-medium text-base">{r.guestName}</TableCell>
+                  <TableCell className="font-medium text-base">{r.guest_name}</TableCell>
                   <TableCell className="text-gold font-semibold text-base">¥{r.amount.toLocaleString()}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
@@ -130,7 +131,7 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground text-sm">#{i + 1}</span>
-                    <span className="font-semibold text-lg">{r.guestName}</span>
+                    <span className="font-semibold text-lg">{r.guest_name}</span>
                   </div>
                   {hasActions && (
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

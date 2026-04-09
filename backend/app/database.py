@@ -42,6 +42,7 @@ async def connect_to_mongo():
     await db_instance.db.banquets.create_index("created_at")
     await db_instance.db.gift_records.create_index("banquet_id")
     await db_instance.db.gift_records.create_index("created_at")
+    await db_instance.db.users.create_index("username", unique=True)
     print("[MongoDB] 索引创建完成")
 
 

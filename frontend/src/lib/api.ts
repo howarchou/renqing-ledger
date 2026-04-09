@@ -5,14 +5,49 @@
 
 const API_BASE = '/api';
 
+// Token 管理
+class TokenStorage {
+  private static TOKEN_KEY = 'auth_token';
+
+  static get(): string | null {
+    try {
+      return localStorage.getItem(this.TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  static set(token: string): void {
+    try {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    } catch {
+      // ignore
+    }
+  }
+
+  static remove(): void {
+    try {
+      localStorage.removeItem(this.TOKEN_KEY);
+    } catch {
+      // ignore
+    }
+  }
+}
+
 // 工具函数
-async function fetchJSON(url: string, options?: RequestInit) {
+async function fetchJSON<T>(url: string, options?: RequestInit) {
+  const token = TokenStorage.get();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options?.headers,
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   });
 
   if (!res.ok) {
@@ -34,6 +69,7 @@ export interface Banquet {
   type: string;
   frozen: boolean;
   created_at: string;
+  deleted_at?: string;
 }
 
 export interface GiftRecord {
@@ -44,6 +80,7 @@ export interface GiftRecord {
   gifts: string[];
   note: string;
   created_at: string;
+  deleted_at?: string;
 }
 
 export interface Statistics {
@@ -113,7 +150,50 @@ export const recordApi = {
     fetchJSON<void>(`${API_BASE}/records/${id}`, { method: 'DELETE' }),
 };
 
-// ============== 统计 API ==============
+// ============== 认证 API ==============
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: {
+    id: string;
+    username: string;
+    created_at: string;
+  };
+}
+
+export const authApi = {
+  /** 注册 */
+  register: (data: RegisterRequest) =>
+    fetchJSON<{ message: string; user: { id: string; username: string; created_at: string } }>(
+      `${API_BASE}/auth/register`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    ),
+
+  /** 登录 */
+  login: (data: LoginRequest) =>
+    fetchJSON<TokenResponse>(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /** 获取当前用户 */
+  me: () =>
+    fetchJSON<{ id: string; username: string; created_at: string }>(`${API_BASE}/auth/me`),
+};
 
 export const statisticsApi = {
   /** 获取宴会统计 */

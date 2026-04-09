@@ -4,13 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { GiftRecord } from '@/types';
 import { Plus, Settings2, X, Pencil } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import type { GiftRecord } from '@/lib/api';
 
 interface Props {
   banquetId: string;
-  onAdd: (r: Omit<GiftRecord, 'id' | 'createdAt'>) => void;
+  onAdd: (r: { guest_name: string; amount: number; gifts: string[]; note: string }) => void;
   giftPresets: string[];
   amountPresets: number[];
   onAddGiftPreset: (g: string) => void;
@@ -28,7 +28,7 @@ export default function GiftRecordForm({
   onAddAmountPreset, onRemoveAmountPreset,
   editingRecord, onUpdate, onCancelEdit,
 }: Props) {
-  const [guestName, setGuestName] = useState(editingRecord?.guestName || '');
+  const [guestName, setGuestName] = useState(editingRecord?.guest_name || '');
   const [amount, setAmount] = useState(editingRecord?.amount?.toString() || '');
   const [selectedGifts, setSelectedGifts] = useState<string[]>(editingRecord?.gifts || []);
   const [customGift, setCustomGift] = useState('');
@@ -39,7 +39,7 @@ export default function GiftRecordForm({
   const [prevEditId, setPrevEditId] = useState(editingRecord?.id);
   if (editingRecord?.id !== prevEditId) {
     setPrevEditId(editingRecord?.id);
-    setGuestName(editingRecord?.guestName || '');
+    setGuestName(editingRecord?.guest_name || '');
     setAmount(editingRecord?.amount?.toString() || '');
     setSelectedGifts(editingRecord?.gifts || []);
     setNote(editingRecord?.note || '');
@@ -59,14 +59,19 @@ export default function GiftRecordForm({
   const handleSubmit = () => {
     if (!guestName.trim() || !Number(amount)) return;
     const data = {
-      banquetId,
-      guestName: guestName.trim(),
+      guest_name: guestName.trim(),
       amount: Number(amount) || 0,
       gifts: selectedGifts,
       note: note.trim(),
     };
     if (editingRecord && onUpdate) {
-      onUpdate({ ...editingRecord, ...data });
+      onUpdate({
+        ...editingRecord,
+        guest_name: data.guest_name,
+        amount: data.amount,
+        gifts: data.gifts,
+        note: data.note,
+      });
     } else {
       onAdd(data);
     }

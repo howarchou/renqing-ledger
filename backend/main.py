@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import lifespan_manager
-from app.routers import banquets_router, records_router, presets_router
+from app.routers import banquets_router, records_router, presets_router, auth_router
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -26,6 +26,7 @@ app.add_middleware(
 )
 
 # 注册路由
+app.include_router(auth_router, prefix="/api")
 app.include_router(banquets_router, prefix="/api")
 app.include_router(records_router, prefix="/api")
 app.include_router(presets_router, prefix="/api")

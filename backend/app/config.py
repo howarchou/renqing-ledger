@@ -1,6 +1,7 @@
 """
 配置管理
 """
+import secrets
 from pydantic_settings import BaseSettings
 
 
@@ -14,6 +15,18 @@ class Settings(BaseSettings):
     # API
     api_title: str = "人情簿 API"
     api_version: str = "1.0.0"
+
+    # JWT Secret
+    secret_key: str = secrets.token_urlsafe(32)
+
+    # 公开路由（无需登录）
+    public_paths: list[str] = [
+        "/api/auth/register",
+        "/api/auth/login",
+        "/health",
+        "/docs",
+        "/openapi.json",
+    ]
 
     class Config:
         env_file = ".env"

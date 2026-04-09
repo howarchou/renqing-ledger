@@ -1,8 +1,9 @@
-import { Banquet, GiftRecord } from '@/types';
+import type { Banquet, GiftRecord } from '@/lib/api';
+import type { DataSource } from '@/hooks/useBanquets';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Users, Banknote, Trash2, Archive, MoreHorizontal, Check } from 'lucide-react';
+import { MapPin, Calendar, Users, Banknote, Trash2, Archive, MoreHorizontal, Check, Cloud, Smartphone, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -19,8 +20,10 @@ import {
 interface Props {
   banquet: Banquet;
   records: GiftRecord[];
+  source: DataSource;
   onDelete: (id: string) => void;
   onFreeze: (id: string) => void;
+  onPush?: (id: string) => void;
 }
 
 const TYPE_EMOJI: Record<string, string> = {
@@ -32,16 +35,18 @@ const TYPE_EMOJI: Record<string, string> = {
   '其他': '🎉',
 };
 
-export default function BanquetCard({ banquet, records, onDelete, onFreeze }: Props) {
+export default function BanquetCard({ banquet, records, source, onDelete, onFreeze, onPush }: Props) {
   const navigate = useNavigate();
   const totalAmount = records.reduce((s, r) => s + r.amount, 0);
   const [showActions, setShowActions] = useState(false);
-  const [dialog, setDialog] = useState<'freeze' | 'delete' | null>(null);
+  const [dialog, setDialog] = useState<'freeze' | 'delete' | 'push' | null>(null);
 
   return (
     <Card
-      className={`cursor-pointer shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1.5 border-0 overflow-hidden ${banquet.frozen ? 'opacity-65 grayscale-[20%]' : ''}`}
-      onClick={() => navigate(`/banquet/${banquet.id}`)}
+      className={`cursor-pointer shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1.5 border-0 overflow-hidden ${
+        banquet.frozen ? 'opacity-65 grayscale-[20%]' : ''
+      }`}
+      onClick={() => navigate(`/banquet/${banquet.id}?source=${source}`)}
     >
       <div className={`h-1.5 w-full ${banquet.frozen ? 'bg-muted-foreground/30' : 'gradient-festive'}`} />
 
@@ -53,46 +58,76 @@ export default function BanquetCard({ banquet, records, onDelete, onFreeze }: Pr
             </div>
             <div className="min-w-0">
               <h3 className="text-lg font-bold text-foreground truncate">{banquet.name}</h3>
-              {banquet.frozen && (
-                <Badge variant="secondary" className="gap-1 text-xs mt-0.5 bg-muted text-muted-foreground">
-                  <Archive className="w-3 h-3" /> 已归档
+              <div className="flex items-center gap-1.5 mt-0.5">
+                {banquet.frozen && (
+                  <Badge variant="secondary" className="gap-1 text-xs bg-muted text-muted-foreground">
+                    <Archive className="w-3 h-3" /> 已归档
+                  </Badge>
+                )}
+                <Badge
+                  variant="outline"
+                  className={`gap-1 text-xs ${
+                    source === 'local'
+                      ? 'border-orange-300 text-orange-600 bg-orange-50'
+                      : 'border-blue-300 text-blue-600 bg-blue-50'
+                  }`}
+                >
+                  {source === 'local' ? (
+                    <>
+                      <Smartphone className="w-3 h-3" /> 本地
+                    </>
+                  ) : (
+                    <>
+                      <Cloud className="w-3 h-3" /> 云端
+                    </>
+                  )}
                 </Badge>
-              )}
+              </div>
             </div>
           </div>
 
           <div className="flex gap-0.5 shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
-                onClick={(e) => { e.stopPropagation(); setShowActions(!showActions); }}
-              >
-                {showActions ? <Check className="w-4 h-4" /> : <MoreHorizontal className="w-4 h-4" />}
-              </Button>
-              {showActions && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  {!banquet.frozen && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      onClick={(e) => { e.stopPropagation(); setDialog('freeze'); }}
-                    >
-                      <Archive className="w-4 h-4" />
-                    </Button>
-                  )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              onClick={(e) => { e.stopPropagation(); setShowActions(!showActions); }}
+            >
+              {showActions ? <Check className="w-4 h-4" /> : <MoreHorizontal className="w-4 h-4" />}
+            </Button>
+            {showActions && (
+              <div onClick={(e) => e.stopPropagation()}>
+                {source === 'local' && !banquet.frozen && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={(e) => { e.stopPropagation(); setDialog('delete'); }}
+                    className="h-8 w-8 text-orange-500 hover:text-orange-600 hover:bg-orange-50"
+                    onClick={(e) => { e.stopPropagation(); setDialog('push'); }}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Upload className="w-4 h-4" />
                   </Button>
-                </div>
-              )}
-            </div>
+                )}
+                {!banquet.frozen && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    onClick={(e) => { e.stopPropagation(); setDialog('freeze'); }}
+                  >
+                    <Archive className="w-4 h-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => { e.stopPropagation(); setDialog('delete'); }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
@@ -159,6 +194,26 @@ export default function BanquetCard({ banquet, records, onDelete, onFreeze }: Pr
               onClick={() => { onDelete(banquet.id); setDialog(null); }}
             >
               永久删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={dialog === 'push'} onOpenChange={(open) => !open && setDialog(null)}>
+        <AlertDialogContent className="sm:max-w-md rounded-2xl w-[calc(100%-2rem)] max-w-[calc(100%-2rem)]" onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认上传到云端</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要将「{banquet.name}」上传到云端吗？上传后本地数据将被删除。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDialog(null)}>取消</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => { onPush?.(banquet.id); setDialog(null); }}
+            >
+              上传
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

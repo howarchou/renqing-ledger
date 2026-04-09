@@ -40,9 +40,15 @@ class RecordService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.collection = db.gift_records
 
-    async def list_by_banquet(self, banquet_id: str) -> list[GiftRecordResponse]:
+    async def list_by_banquet(self, banquet_id: str, user_id: str) -> list[GiftRecordResponse]:
         """获取宴会的所有记录"""
         if not ObjectId.is_valid(banquet_id):
+            return []
+        # 先验证宴会属于该用户
+        banquet = await self.collection.database.banquets.find_one(
+            {"_id": ObjectId(banquet_id), "deleted_at": None, "user_id": user_id}
+        )
+        if not banquet:
             return []
         cursor = self.collection.find(
             {"banquet_id": ObjectId(banquet_id), "deleted_at": None}
@@ -50,19 +56,35 @@ class RecordService:
         docs = await cursor.to_list(length=10000)
         return [_doc_to_record(doc) for doc in docs]
 
-    async def get(self, record_id: str) -> Optional[GiftRecordResponse]:
+    async def get(self, record_id: str, user_id: str) -> Optional[GiftRecordResponse]:
         """获取单条记录"""
         if not ObjectId.is_valid(record_id):
             return None
         doc = await self.collection.find_one(
             {"_id": ObjectId(record_id), "deleted_at": None}
         )
+        # 验证关联的宴会属于该用户
+        if doc:
+            banquet = await self.collection.database.banquets.find_one(
+                {"_id": doc["banquet_id"], "deleted_at": None, "user_id": user_id}
+            )
+            if not banquet:
+                return None
         return _doc_to_record(doc) if doc else None
 
     async def create(
-        self, banquet_id: str, data: GiftRecordCreate
+        self, banquet_id: str, data: GiftRecordCreate, user_id: str
     ) -> GiftRecordResponse:
         """创建记录"""
+        # 验证宴会属于该用户
+        banquet = await self.collection.database.banquets.find_one(
+            {"_id": ObjectId(banquet_id), "deleted_at": None, "user_id": user_id}
+        )
+        if not banquet:
+            raise ValueError("宴会不存在")
+        if banquet.get("frozen"):
+            raise ValueError("宴会已归档")
+
         doc = {
             "banquet_id": ObjectId(banquet_id),
             "guest_name": data.guest_name,
@@ -76,11 +98,25 @@ class RecordService:
         return _doc_to_record(doc)
 
     async def update(
-        self, record_id: str, data: GiftRecordUpdate
+        self, record_id: str, data: GiftRecordUpdate, user_id: str
     ) -> Optional[GiftRecordResponse]:
         """更新记录"""
         if not ObjectId.is_valid(record_id):
             return None
+
+        # 验证记录存在且属于该用户
+        doc = await self.collection.find_one(
+            {"_id": ObjectId(record_id), "deleted_at": None}
+        )
+        if not doc:
+            return None
+        banquet = await self.collection.database.banquets.find_one(
+            {"_id": doc["banquet_id"], "deleted_at": None, "user_id": user_id}
+        )
+        if not banquet:
+            return None
+        if banquet.get("frozen"):
+            raise ValueError("宴会已归档")
 
         update_data = {
             k: v for k, v in data.model_dump().items() if v is not None
@@ -95,9 +131,20 @@ class RecordService:
         )
         return _doc_to_record(result) if result else None
 
-    async def delete(self, record_id: str) -> bool:
+    async def delete(self, record_id: str, user_id: str) -> bool:
         """软删除记录"""
         if not ObjectId.is_valid(record_id):
+            return False
+        # 验证记录属于该用户
+        doc = await self.collection.find_one(
+            {"_id": ObjectId(record_id), "deleted_at": None}
+        )
+        if not doc:
+            return False
+        banquet = await self.collection.database.banquets.find_one(
+            {"_id": doc["banquet_id"], "deleted_at": None, "user_id": user_id}
+        )
+        if not banquet:
             return False
         result = await self.collection.update_one(
             {"_id": ObjectId(record_id), "deleted_at": None},
@@ -105,9 +152,15 @@ class RecordService:
         )
         return result.modified_count > 0
 
-    async def delete_by_banquet(self, banquet_id: str) -> int:
+    async def delete_by_banquet(self, banquet_id: str, user_id: str) -> int:
         """软删除宴会的所有记录，返回删除数量"""
         if not ObjectId.is_valid(banquet_id):
+            return 0
+        # 验证宴会属于该用户
+        banquet = await self.collection.database.banquets.find_one(
+            {"_id": ObjectId(banquet_id), "deleted_at": None, "user_id": user_id}
+        )
+        if not banquet:
             return 0
         result = await self.collection.update_many(
             {"banquet_id": ObjectId(banquet_id), "deleted_at": None},
@@ -131,9 +184,23 @@ class StatisticsService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.record_collection = db.gift_records
 
-    async def get_banquet_stats(self, banquet_id: str) -> StatisticsResponse:
+    async def get_banquet_stats(self, banquet_id: str, user_id: str) -> StatisticsResponse:
         """获取宴会统计数据"""
         if not ObjectId.is_valid(banquet_id):
+            return StatisticsResponse(
+                total_amount=0,
+                guest_count=0,
+                avg_amount=0,
+                gift_types_count=0,
+                top_guests=[],
+                gift_stats=[],
+            )
+
+        # 验证宴会属于该用户
+        banquet = await self.record_collection.database.banquets.find_one(
+            {"_id": ObjectId(banquet_id), "deleted_at": None, "user_id": user_id}
+        )
+        if not banquet:
             return StatisticsResponse(
                 total_amount=0,
                 guest_count=0,

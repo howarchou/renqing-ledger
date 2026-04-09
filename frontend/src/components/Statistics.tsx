@@ -1,4 +1,4 @@
-import { GiftRecord } from '@/types';
+import type { GiftRecord } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, Banknote, TrendingUp, Gift } from 'lucide-react';
 
@@ -54,7 +54,7 @@ export default function Statistics({ records }: Props) {
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'gradient-gold text-primary-foreground' : i === 1 ? 'bg-muted-foreground/20 text-muted-foreground' : i === 2 ? 'bg-secondary/20 text-secondary' : 'bg-muted text-muted-foreground'}`}>
                         {i + 1}
                       </span>
-                      <span className="font-medium">{r.guestName}</span>
+                      <span className="font-medium">{r.guest_name}</span>
                     </span>
                     <span className="text-gold-dark font-bold">¥{r.amount.toLocaleString()}</span>
                   </div>

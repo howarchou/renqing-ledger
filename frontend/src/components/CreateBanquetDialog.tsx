@@ -7,11 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Plus, Calendar as CalendarIcon } from 'lucide-react';
-import { Banquet, BanquetType, BANQUET_TYPES } from '@/types';
+import { BanquetType, BANQUET_TYPES } from '@/types';
 import { format, parseISO } from 'date-fns';
 
 interface Props {
-  onAdd: (b: Omit<Banquet, 'id' | 'createdAt'>) => void;
+  onAdd: (b: { name: string; date: string; location: string; type: BanquetType }) => void;
 }
 
 const TYPE_EMOJI: Record<string, string> = {
