@@ -26,7 +26,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: MONGODB_URI
-              value: "mongodb://root:MONGODB_PASSWORD@localhost:27017/admin?authSource=admin"
+              value: "mongodb://root:${MONGODB_PASSWORD}@localhost:27017/admin?authSource=admin"
             - name: DATABASE_NAME
               value: "renqing"
           livenessProbe:

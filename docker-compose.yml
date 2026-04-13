@@ -21,7 +21,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      MONGODB_URI: mongodb://root:${MONGODB_PASSWORD:-renqing2024}@mongodb:27017/renqing?authSource=admin
+      MONGODB_URI: mongodb://root:${MONGODB_PASSWORD}@mongodb:27017/renqing?authSource=admin
     depends_on:
       - mongodb
 
