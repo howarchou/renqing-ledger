@@ -124,9 +124,3 @@ jobs:
 
       - name: Wait for frontend deployment
         run: kubectl rollout status deployment/renqin-frontend --timeout=120s
-
-      - name: Verify deployments
-        run: |
-#          kubectl get pods -l app=mongodb
-          kubectl get pods -l app=renqin-backend
-          kubectl get pods -l app=renqin-frontend
