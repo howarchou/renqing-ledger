@@ -6,8 +6,6 @@ metadata:
     app: renqin-frontend
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: renqin-frontend
@@ -24,5 +22,3 @@ spec:
           ports:
             - containerPort: 8080
           imagePullPolicy: Always
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet

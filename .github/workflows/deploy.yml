@@ -127,6 +127,6 @@ jobs:
 
       - name: Verify deployments
         run: |
-          kubectl get pods -l app=mongodb
+#          kubectl get pods -l app=mongodb
           kubectl get pods -l app=renqin-backend
           kubectl get pods -l app=renqin-frontend
