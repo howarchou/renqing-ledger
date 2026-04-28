@@ -113,6 +113,11 @@ jobs:
         run: |
           sed -i "s|MONGODB_PASSWORD|${{ secrets.MONGODB_PASSWORD }}|g" k8s/backend-deployment.yaml
 
+      - name: Replace domain in ingress
+        run: |
+          sed -i "s|HOSTNAME|${{ secrets.DOMAIN_NAME }}|g" k8s/ingress.yaml
+          sed -i "s|TLS_SECRET|${{ secrets.TLS_SECRET_NAME }}|g" k8s/ingress.yaml
+
       - name: Deploy Backend to k3s
         run: kubectl apply -f k8s/backend-deployment.yaml
 
